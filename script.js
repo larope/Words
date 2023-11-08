@@ -1,46 +1,68 @@
 const words = getWords();
 let visibleWords = [];
-let lastEnteredLetter = "";
 let selectedWord = false;
-let currentCharColor = SELECTED_WORD_COLOR;
+let currentCharColor = COLOR_SELECTED_WORD;
 let spawningInterval = INITIAL_SPAWNING_INTERVAL;
 let scoreText = {
     x:10,
-    y:70,
+    y:42,
     score: 0
 }
+let accuracyText = {
+    x:10,
+    y:42,
+    score: 0
+}
+let maxScoreTextWidth;
+let accuracy = 100;
+let triedToTypeCharacters = 0;
+let failed = 0;
 
 function setup() {
+    noStroke();
     createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-    textSize(FONT_SIZE);
+    textSize(SCORE_TEXT_SIZE);
+    maxScoreTextWidth = textWidth("Your score is 1000000")
+
+    scoreText.y = textAscent();
+    accuracyText.y = textAscent()*2.5;
+
+    textSize(TEXT_SIZE);
+    textFont(TEXT_FONT);
+
     words.forEach((item) => {
-        item.x = random(0, SCREEN_WIDTH-textWidth(item.text));
+        item.x = random(maxScoreTextWidth, SCREEN_WIDTH-textWidth(item.text)-20);
         item.y = 0;
     })
-    textFont(TEXT_FONT); // Use the font-family defined in the CSSplaySound
     setTimeout(AddWord(), spawningInterval);
 
+
 }
-
+//"#283618"
 function draw() {
-    background(BACKGROUD_COLOR);
+    background(COLOR_BACKGROUD);
 
+    accuracy = 100-(failed/(triedToTypeCharacters/100))
+    console.log(accuracy);
+    fill(COLOR_UNSELECTED_WORD);
+    rect(0,0, maxScoreTextWidth, SCREEN_HEIGHT);
     let deltaTime = 1/frameRate();
-
+    textSize(TEXT_SIZE);
+    let haveBeen = false;
     for(let word of visibleWords) {
-        if(word == undefined) continue;
+        if(word === undefined) continue;
         let textToDraw;
-        if(word.text == selectedWord.text){
-            textToDraw = [{text : selectedWord.text.slice(0, selectedWord.index), color : SELECTED_WORD_COLOR_SUCCEED},
+        if(word.text === selectedWord.text && haveBeen == false){
+            haveBeen = true;
+            textToDraw = [{text : selectedWord.text.slice(0, selectedWord.index), color : COLOR_SELECTED_WORD_SUCCEED},
                 {text : selectedWord.text[selectedWord.index], color: currentCharColor},
-                {text : selectedWord.text.slice(selectedWord.index+1, selectedWord.text.length), color : SELECTED_WORD_COLOR}]
+                {text : selectedWord.text.slice(selectedWord.index+1, selectedWord.text.length), color : COLOR_SELECTED_WORD}]
         }else{
-            textToDraw = [{text : word.text,color : UNSELECTED_WORD_COLOR}]
+            textToDraw = [{text : word.text,color : COLOR_UNSELECTED_WORD}]
         }
 
         let x = word.x;
         for(let wordToDraw of textToDraw){
-            textSize(FONT_SIZE);
             fill(wordToDraw.color);
             text(wordToDraw.text, x, Math.floor(word.y));
             x+=textWidth(wordToDraw.text);
@@ -48,8 +70,13 @@ function draw() {
         word.y += WORD_SPEED*deltaTime;
     }
     if(visibleWords[0] != undefined && visibleWords[0].y > SCREEN_HEIGHT) lose();
-    fill("#023e8a");
+    fill(COLOR_BACKGROUD);
+    textSize(SCORE_TEXT_SIZE);
     text("Your score is " + scoreText.score, scoreText.x, scoreText.y);
+
+    textSize(SCORE_TEXT_SIZE*0.75);
+    fill(COLOR_BACKGROUD);
+    text("Your accuracy is " + Math.ceil((isNaN(accuracy) ? 100 : accuracy) *100)/100 + "%", accuracyText.x, accuracyText.y);
 }
 
 
@@ -69,13 +96,17 @@ function keyTyped() {
     fillSelectedWord(key);
 }
 function fillSelectedWord(letter){
-    if(selectedWord == false) return;
-
+    if(selectedWord === false) return;
     let expectedLetter = selectedWord.text[selectedWord.index]
-    currentCharColor = expectedLetter == letter ? SELECTED_WORD_COLOR : SELECTED_WORD_COLOR_FAILED;
+
+    if(currentCharColor !== COLOR_SELECTED_WORD_FAILED) triedToTypeCharacters++;
 
     if(expectedLetter == letter) selectedWord.index++;
+    else if(currentCharColor !== COLOR_SELECTED_WORD_FAILED) failed++;
+
     if(selectedWord.index == selectedWord.text.length) completeWord();
+    currentCharColor = expectedLetter === letter ? COLOR_SELECTED_WORD : COLOR_SELECTED_WORD_FAILED;
+
 }
 function completeWord(){
     scoreText.score++;
@@ -109,7 +140,7 @@ const playSound = (path) => {
     let audio = new Audio(path);
 
     audio.mozPreservesPitch = false;
-    audio.playbackRate =(Math.random()+1);
+    audio.playbackRate =(Math.random()/2+0.75);
     audio.play();
 }
 
