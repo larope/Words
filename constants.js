@@ -3,7 +3,7 @@ const COLOR_UNSELECTED_WORD = "#353535";
 const COLOR_SELECTED_WORD = "#014f86";
 const COLOR_SELECTED_WORD_SUCCEED = "#8ac926";
 const COLOR_SELECTED_WORD_FAILED = "#ff595e";
-
+const COLOR_SELECTED_CURRENT_LETTER = "#ffba08";
 
 const TEXT_FONT = "playpen-sans-bold";
 const SCORE_FONT = "ubuntu-regular";

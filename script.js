@@ -105,7 +105,7 @@ function fillSelectedWord(letter){
     else if(currentCharColor !== COLOR_SELECTED_WORD_FAILED) failed++;
 
     if(selectedWord.index == selectedWord.text.length) completeWord();
-    currentCharColor = expectedLetter === letter ? COLOR_SELECTED_WORD : COLOR_SELECTED_WORD_FAILED;
+    currentCharColor = expectedLetter === letter ? COLOR_SELECTED_CURRENT_LETTER : COLOR_SELECTED_WORD_FAILED;
 
 }
 function completeWord(){
@@ -140,7 +140,7 @@ const playSound = (path) => {
     let audio = new Audio(path);
 
     audio.mozPreservesPitch = false;
-    audio.playbackRate =(Math.random()/2+0.75);
+    audio.playbackRate =(Math.random()*1.5+0.1);
     audio.play();
 }
 
